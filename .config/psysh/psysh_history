@@ -1,0 +1,4 @@
+DB::select("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'sessions'");
+exit
+DB::table('migrations')->where('migration', '2025_05_25_054746_create_sessions_table')->delete();
+exit

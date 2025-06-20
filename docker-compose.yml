@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: forum_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - forum_network
+    depends_on:
+      - postgres
+      - redis
+
+  nginx:
+    image: nginx:alpine
+    container_name: forum_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+    networks:
+      - forum_network
+    depends_on:
+      - app
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: forum_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: forum_db
+      POSTGRES_USER: forum_user
+      POSTGRES_PASSWORD: 1djSee0OtmxnKaw8OVu0hRpCnhyTGTX2peQZxYOElKU=
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - forum_network
+
+  redis:
+    image: redis:alpine
+    container_name: forum_redis
+    command: redis-server --requirepass XauqLGdvH1oY/R+LsVJWbHNMTQ8qbltmEpSr6lvtXVo=
+    restart: unless-stopped
+    networks:
+      - forum_network
+
+volumes:
+  postgres_data:
+
+networks:
+  forum_network:
+    driver: bridge
